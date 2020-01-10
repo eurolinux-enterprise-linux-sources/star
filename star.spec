@@ -4,7 +4,7 @@
 Summary:  An archiving tool with ACL support
 Name: star
 Version: 1.5
-Release: 9%{?dist}
+Release: 11.1%{?dist}
 URL: http://cdrecord.berlios.de/old/private/star.html
 Source: ftp://ftp.berlios.de/pub/star/%{name}-%{version}.tar.bz2
 
@@ -20,6 +20,9 @@ Patch4: star-1.5-removenames_c.patch
 Patch5: star-1.5-stdioconflict.patch
 #Prevent buffer overflow for filenames with length of 100 characters (#561503)
 Patch6: star-1.5.1-bufferoverflow.patch
+
+# Fix for segfault in SELinux patch (#1073539)
+Patch7: star-1.5-xattr-segfault.patch
 
 License: CDDL
 Group: Applications/Archiving
@@ -41,6 +44,7 @@ and can restore individual files from the archive. Star supports ACL.
 %patch4 -p1 -b .removenames
 %patch5 -p1 -b .conflict
 %patch6 -p1 -b .namesoverflow
+%patch7 -p1 -b .selinux-segfault
 iconv -f iso_8859-1 -t utf-8 AN-1.5 >AN-1.5_utf8
 mv AN-1.5_utf8 AN-1.5
 cp -a READMEs/README.linux .
@@ -61,7 +65,7 @@ export MAKEPROG=gmake
 
 #make %{?_smp_mflags} PARCH=%{_target_cpu} CPPOPTX="-DNO_FSYNC" \
 make %{?_smp_mflags} PARCH=%{_target_cpu} \
-COPTX="$RPM_OPT_FLAGS -DTRY_EXT2_FS" CC="%{__cc}" \
+COPTX="$RPM_OPT_FLAGS -fno-strict-aliasing -DTRY_EXT2_FS" CC="%{__cc}" \
 K_ARCH=%{_target_cpu} \
 CONFFLAGS="%{_target_platform} --prefix=%{_prefix} \
     --exec-prefix=%{_exec_prefix} --bindir=%{_bindir} \
@@ -116,6 +120,15 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_mandir}/man1/ustar.1*
 
 %changelog
+* Thu Mar 06 2014 Pavel Raiskup <praiskup@redhat.com> - 1.5-11.1
+- fix for segfault in SELinux code path (#1073539)
+
+* Mon Jul 27 2011 Ondrej Vasik <ovasik@redhat.com> 1.5-11
+- build with no-strict-aliasing flag
+
+* Mon Jul 27 2011 Ondrej Vasik <ovasik@redhat.com> 1.5-10
+- fix other instances of segfault(multivol,100chars)(#611402)
+
 * Wed Feb 03 2010 Ondrej Vasik <ovasik@redhat.com> 1.5-9
 - fix buffer overflow for files with names of length
   100 chars(#561503)
