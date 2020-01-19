@@ -7,7 +7,7 @@
 Summary:  An archiving tool with ACL support
 Name: star
 Version: 1.5.2
-Release: 13%{?dist}
+Release: 9%{?dist}
 URL: http://cdrecord.berlios.de/old/private/star.html
 Source: ftp://ftp.berlios.de/pub/star/%{name}-%{version}.tar.bz2
 
@@ -50,9 +50,6 @@ Patch11: star-1.5.2-use-ssh-by-default.patch
 
 # FIXME: profiling isn't currently supported on aarch64 (should be in glibc-2.18)
 Patch12: star-disable-profiling.patch
-
-# Fix segfault for 'pax -X' (rhbz#1175613)
-Patch13: star-1.5.2-pax-X-option.patch
 
 Requires(post):  %{ALTERNATIVES}
 Requires(preun): %{ALTERNATIVES}
@@ -136,7 +133,6 @@ restoring files from a backup), and tar (an archiving program).
 %ifarch aarch64
 %patch12 -p1 -b .aarch64
 %endif
-%patch13 -p1 -b .option-X-segfault
 
 cp -a star/all.mk star/Makefile
 
@@ -152,7 +148,7 @@ star_recode AN-1.5 AN-1.5.2 star/star.4
 
 cp -a READMEs/README.linux .
 
-for PLAT in %{arm} %{power64} aarch64 x86_64 s390 s390x sh3 sh4 sh4a sparcv9; do
+for PLAT in %{arm} x86_64 ppc64 s390 s390x sh3 sh4 sh4a sparcv9 aarch64; do
     for AFILE in gcc cc; do
             [ ! -e RULES/${PLAT}-linux-${AFILE}.rul ] \
             && ln -s i586-linux-${AFILE}.rul RULES/${PLAT}-linux-${AFILE}.rul
@@ -253,22 +249,6 @@ fi
 %{_sysconfdir}/rmt
 
 %changelog
-* Mon Jul 27 2015 Scientific Linux Auto Patch Process <SCIENTIFIC-LINUX-DEVEL@LISTSERV.FNAL.GOV>
-- Eliminated rpmbuild "bogus date" error due to inconsistent weekday,
-  by assuming the date is correct and changing the weekday.
-
-* Mon May 18 2015 Pavel Raiskup <praiskup@redhat.com> - 1.5.2-13
-- fix segfault for pax -X (rhbz#1175613)
-
-* Mon Aug 11 2014 Pavel Raiskup <praiskup@redhat.com> - 1.5.2-12
-- enable build for ppc64le (#1125688)
-
-* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 1.5.2-11
-- Mass rebuild 2014-01-24
-
-* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.5.2-10
-- Mass rebuild 2013-12-27
-
 * Thu Nov 07 2013 Ondrej Vasik <ovasik@redhat.com> - 1.5.2-9
 - disable profiling on aarch64 (#1027484)
 
